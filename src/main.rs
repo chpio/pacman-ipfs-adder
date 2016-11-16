@@ -1,7 +1,7 @@
 use std::process::{Command, Output, Stdio};
 
 fn assert_cmd_output(name: &str, o: &Output) {
-    if o.status.success() {
+    if !o.status.success() {
         panic!("`{}` exited with status: {}\n{}",
                name,
                o.status,
