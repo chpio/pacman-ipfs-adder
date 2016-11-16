@@ -27,7 +27,7 @@ fn main() {
 
     println!(">>> adding to ipfs...");
     let ipfs_out = Command::new("ipfs")
-        .args(&["--quiet", "--recursive", "/data/arch"])
+        .args(&["add", "--quiet", "--recursive", "/data/arch"])
         .output()
         .unwrap();
     assert_cmd_output("ipfs add", &ipfs_out);
