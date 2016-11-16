@@ -17,6 +17,7 @@ fn main() {
                 "--delay-updates",
                 "--copy-links",
                 "--safe-links",
+                "--info=progress2",
                 "rsync://mirror.23media.de/archlinux/",
                 "/data/arch"])
         .stdout(Stdio::inherit())
