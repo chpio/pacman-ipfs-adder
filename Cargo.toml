@@ -4,3 +4,7 @@ version = "0.0.0"
 authors = ["Thomas Heck <t@b128.net>"]
 
 [dependencies]
+
+[profile.release]
+lto = true
+panic = "abort"
