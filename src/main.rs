@@ -1,4 +1,6 @@
 use std::process::{Command, Output, Stdio};
+use std::fs::OpenOptions;
+use std::io::prelude::*;
 
 fn assert_cmd_output(name: &str, o: &Output) {
     if !o.status.success() {
@@ -38,6 +40,36 @@ fn main() {
         ipfs_stdout.lines().last().expect("No stdout from ipfs add").to_string()
     };
     println!(">>> ipfs hash: {:?}", ipfs_hash);
+
+    {
+        let mut hashes_file = OpenOptions::new()
+            .read(true)
+            .open("/data/pacman-ipfs-adder-hashes")
+            .unwrap();
+        let mut content = String::new();
+        hashes_file.read_to_string(&mut content).unwrap();
+        for h in content.lines().filter(|h| h != &ipfs_hash) {
+            println!(">>> unpinning: {:?}", h);
+            Command::new("ipfs")
+                .args(&["pin", "rm", h])
+                .stdout(Stdio::inherit())
+                .stderr(Stdio::inherit())
+                .spawn()
+                .unwrap()
+                .wait()
+                .unwrap();
+        }
+    }
+
+    {
+        let mut hashes_file = OpenOptions::new()
+            .write(true)
+            .truncate(true)
+            .create(true)
+            .open("/data/pacman-ipfs-adder-hashes")
+            .unwrap();
+        writeln!(hashes_file, "{}", ipfs_hash).unwrap();
+    }
 
     println!(">>> publishing to ipns...");
     {
