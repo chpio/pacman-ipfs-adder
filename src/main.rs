@@ -74,7 +74,7 @@ fn main() {
     println!(">>> publishing to ipns...");
     {
         let ipfs_out = Command::new("ipfs")
-            .args(&["name", "publish", &ipfs_hash])
+            .args(&["name", "publish", "--lifetime=12h", "--ttl=1h", &ipfs_hash])
             .stdout(Stdio::inherit())
             .output()
             .unwrap();
