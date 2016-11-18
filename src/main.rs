@@ -41,22 +41,23 @@ fn main() {
     println!(">>> ipfs hash: {:?}", ipfs_hash);
 
     {
-        let mut hashes_file = OpenOptions::new()
+        let hashes_file = OpenOptions::new()
             .read(true)
-            .open("/data/pacman-ipfs-adder-hashes")
-            .unwrap();
-        let mut content = String::new();
-        hashes_file.read_to_string(&mut content).unwrap();
-        for h in content.lines().filter(|h| h != &ipfs_hash) {
-            println!(">>> unpinning: {:?}", h);
-            Command::new("ipfs")
-                .args(&["pin", "rm", h])
-                .stdout(Stdio::inherit())
-                .stderr(Stdio::inherit())
-                .spawn()
-                .unwrap()
-                .wait()
-                .unwrap();
+            .open("/data/pacman-ipfs-adder-hashes");
+        if let Ok(mut hashes_file) = hashes_file {
+            let mut content = String::new();
+            hashes_file.read_to_string(&mut content).unwrap();
+            for h in content.lines().filter(|h| h != &ipfs_hash) {
+                println!(">>> unpinning: {:?}", h);
+                Command::new("ipfs")
+                    .args(&["pin", "rm", h])
+                    .stdout(Stdio::inherit())
+                    .stderr(Stdio::inherit())
+                    .spawn()
+                    .unwrap()
+                    .wait()
+                    .unwrap();
+            }
         }
     }
 
