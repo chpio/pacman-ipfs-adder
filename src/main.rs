@@ -2,6 +2,12 @@ use std::process::{Command, Output, Stdio};
 use std::fs::OpenOptions;
 use std::io::prelude::*;
 
+const MIRRORS: &[&str] = &[
+    "rsync://pkg.adfinis-sygroup.ch/archlinux/",
+    "rsync://mirror.23media.de/archlinux/",
+    "rsync://mirror.f4st.host/archlinux/",
+];
+
 fn assert_cmd_output(name: &str, o: &Output) {
     if !o.status.success() {
         panic!("`{}` exited with status: {}\n{}",
@@ -12,20 +18,27 @@ fn assert_cmd_output(name: &str, o: &Output) {
 }
 
 fn main() {
-    println!(">>> rsyncing...");
-    {
+    for (i, mirror) in MIRRORS.iter().enumerate() {
+        println!(">>> rsyncing from `{}`...", mirror);
         let rsync_out = Command::new("rsync")
             .args(&["-rtlH",
                     "--delete-after",
                     "--delay-updates",
                     "--copy-links",
                     "--safe-links",
-                    "rsync://mirror.23media.de/archlinux/",
+                    mirror,
                     "/data/arch"])
             .stdout(Stdio::inherit())
             .output()
             .unwrap();
-        assert_cmd_output("rsync", &rsync_out);
+        if rsync_out.status.success() {
+            break;
+        } else {
+            println!(">>> rsync failed");
+            if i + 1 == MIRRORS.len() {
+                panic!("all mirrors failed");
+            }
+        }
     }
 
     println!(">>> adding to ipfs...");
