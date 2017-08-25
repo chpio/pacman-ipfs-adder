@@ -41,6 +41,7 @@ fn main() {
                 "/data/arch",
             ])
             .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
             .output()
             .unwrap();
         if rsync_out.status.success() {
