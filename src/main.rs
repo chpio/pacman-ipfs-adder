@@ -69,13 +69,16 @@ fn main() {
     };
     println!(">>> ipfs hash: {:?}", ipfs_hash);
 
+    let mut unpin_failed_hashes = Vec::new();
     {
         let hashes_file = OpenOptions::new()
             .read(true)
             .open("/data/pacman-ipfs-adder-hashes");
         if let Ok(mut hashes_file) = hashes_file {
             let mut content = String::new();
-            hashes_file.read_to_string(&mut content).unwrap();
+            hashes_file
+                .read_to_string(&mut content)
+                .expect("failed reading hash file");
             for h in content.lines().filter(|h| h != &ipfs_hash) {
                 println!(">>> unpinning: `{}`", h);
                 let status = Command::new("ipfs")
@@ -83,6 +86,7 @@ fn main() {
                     .status()
                     .expect("failed to execute ipfs pin rm");
                 if !status.success() {
+                    unpin_failed_hashes.push(h.to_string());
                     println!(">>> unpin failed on `{}`", h);
                 }
             }
@@ -95,8 +99,13 @@ fn main() {
             .truncate(true)
             .create(true)
             .open("/data/pacman-ipfs-adder-hashes")
-            .expect("failed to open ipfs hash file");
-        writeln!(hashes_file, "{}", ipfs_hash).expect("failed to write ipfs hash");
+            .expect("failed opening hash file");
+        writeln!(
+            hashes_file,
+            "{}\n{}",
+            ipfs_hash,
+            unpin_failed_hashes.join("\n")
+        ).expect("failed writing hash file");
     }
 
     println!(">>> publishing to ipns...");
