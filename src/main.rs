@@ -1,6 +1,9 @@
+extern crate rand;
+
 use std::process::{Command, Output, Stdio};
 use std::fs::OpenOptions;
 use std::io::prelude::*;
+use rand::Rng;
 
 const MIRRORS: &[&str] = &[
     "rsync://pkg.adfinis-sygroup.ch/archlinux/",
@@ -18,7 +21,9 @@ fn assert_cmd_output(name: &str, o: &Output) {
 }
 
 fn main() {
-    for (i, mirror) in MIRRORS.iter().enumerate() {
+    let mut mirrors = MIRRORS.to_vec();
+    rand::thread_rng().shuffle(&mut mirrors);
+    for mirror in mirrors.iter() {
         println!(">>> rsyncing from `{}`...", mirror);
         let rsync_out = Command::new("rsync")
             .args(&["-rtlH",
@@ -35,7 +40,7 @@ fn main() {
             break;
         } else {
             println!(">>> rsync failed");
-            if i + 1 == MIRRORS.len() {
+            if mirror == mirrors.last().unwrap() {
                 panic!("all mirrors failed");
             }
         }

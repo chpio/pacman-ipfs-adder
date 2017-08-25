@@ -1,10 +1,9 @@
 [package]
+authors = ["Thomas Heck <t@b128.net>"]
 name = "pacman-ipfs-adder"
 version = "0.0.0"
-authors = ["Thomas Heck <t@b128.net>"]
-
 [dependencies]
-
+rand = "0.3.16"
 [profile.release]
 lto = true
 panic = "abort"
