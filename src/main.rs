@@ -13,10 +13,12 @@ const MIRRORS: &[&str] = &[
 
 fn assert_cmd_output(name: &str, o: &Output) {
     if !o.status.success() {
-        panic!("`{}` exited with status: {}\n{}",
-               name,
-               o.status,
-               String::from_utf8_lossy(&o.stderr));
+        panic!(
+            "`{}` exited with status: {}\n{}",
+            name,
+            o.status,
+            String::from_utf8_lossy(&o.stderr)
+        );
     }
 }
 
@@ -27,16 +29,17 @@ fn main() {
         println!(">>> rsyncing from `{}`...", mirror);
         let rsync_out = Command::new("rsync")
             .args(&[
-                    "--no-motd",
-                    "--recursive",
-                    "--times",
-                    "--safe-links",
-                    "--copy-links",
-                    "--hard-links",
-                    "--delete-after",
-                    "--delay-updates",
-                    mirror,
-                    "/data/arch"])
+                "--no-motd",
+                "--recursive",
+                "--times",
+                "--safe-links",
+                "--copy-links",
+                "--hard-links",
+                "--delete-after",
+                "--delay-updates",
+                mirror,
+                "/data/arch",
+            ])
             .stdout(Stdio::inherit())
             .output()
             .unwrap();
@@ -58,7 +61,11 @@ fn main() {
             .unwrap();
         assert_cmd_output("ipfs add", &ipfs_out);
         let ipfs_stdout = String::from_utf8_lossy(&ipfs_out.stdout);
-        ipfs_stdout.lines().last().expect("No stdout from ipfs add").to_string()
+        ipfs_stdout
+            .lines()
+            .last()
+            .expect("No stdout from ipfs add")
+            .to_string()
     };
     println!(">>> ipfs hash: {:?}", ipfs_hash);
 
@@ -96,7 +103,13 @@ fn main() {
     println!(">>> publishing to ipns...");
     {
         let ipfs_out = Command::new("ipfs")
-            .args(&["name", "publish", "--lifetime=12h", "--ttl=1h", &ipfs_hash])
+            .args(&[
+                "name",
+                "publish",
+                "--lifetime=12h",
+                "--ttl=1h",
+                &ipfs_hash,
+            ])
             .stdout(Stdio::inherit())
             .output()
             .unwrap();
