@@ -32,6 +32,7 @@ fn main() {
                 "--no-motd",
                 "--recursive",
                 "--times",
+                "--keep-dirlinks",
                 "--safe-links",
                 "--copy-links",
                 "--hard-links",
