@@ -26,11 +26,15 @@ fn main() {
     for mirror in mirrors.iter() {
         println!(">>> rsyncing from `{}`...", mirror);
         let rsync_out = Command::new("rsync")
-            .args(&["-rtlH",
+            .args(&[
+                    "--no-motd",
+                    "--recursive",
+                    "--times",
+                    "--safe-links",
+                    "--copy-links",
+                    "--hard-links",
                     "--delete-after",
                     "--delay-updates",
-                    "--copy-links",
-                    "--safe-links",
                     mirror,
                     "/data/arch"])
             .stdout(Stdio::inherit())
