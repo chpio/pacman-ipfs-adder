@@ -38,6 +38,8 @@ fn main() {
                 "--hard-links",
                 "--delete-after",
                 "--delay-updates",
+                "--delete-excluded",
+                "--exclude=**spyder3-3.1.4*",
                 mirror,
                 "/data/arch",
             ])
