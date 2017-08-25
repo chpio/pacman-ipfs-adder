@@ -1,6 +1,6 @@
 extern crate rand;
 
-use std::process::{Command, Output, Stdio};
+use std::process::{Command, Output};
 use std::fs::OpenOptions;
 use std::io::prelude::*;
 use rand::Rng;
@@ -27,7 +27,7 @@ fn main() {
     rand::thread_rng().shuffle(&mut mirrors);
     for mirror in mirrors.iter() {
         println!(">>> rsyncing from `{}`...", mirror);
-        let rsync_out = Command::new("rsync")
+        let status = Command::new("rsync")
             .args(&[
                 "--no-motd",
                 "--recursive",
@@ -41,11 +41,9 @@ fn main() {
                 mirror,
                 "/data/arch",
             ])
-            .stdout(Stdio::inherit())
-            .stderr(Stdio::inherit())
-            .output()
-            .unwrap();
-        if rsync_out.status.success() {
+            .status()
+            .expect("failed to execute rsync");
+        if status.success() {
             break;
         } else {
             println!(">>> rsync failed");
@@ -60,7 +58,7 @@ fn main() {
         let ipfs_out = Command::new("ipfs")
             .args(&["add", "--quiet", "--recursive", "/data/arch"])
             .output()
-            .unwrap();
+            .expect("failed to execute ipfs add");
         assert_cmd_output("ipfs add", &ipfs_out);
         let ipfs_stdout = String::from_utf8_lossy(&ipfs_out.stdout);
         ipfs_stdout
@@ -79,15 +77,14 @@ fn main() {
             let mut content = String::new();
             hashes_file.read_to_string(&mut content).unwrap();
             for h in content.lines().filter(|h| h != &ipfs_hash) {
-                println!(">>> unpinning: {:?}", h);
-                Command::new("ipfs")
+                println!(">>> unpinning: `{}`", h);
+                let status = Command::new("ipfs")
                     .args(&["pin", "rm", h])
-                    .stdout(Stdio::inherit())
-                    .stderr(Stdio::inherit())
-                    .spawn()
-                    .unwrap()
-                    .wait()
-                    .unwrap();
+                    .status()
+                    .expect("failed to execute ipfs pin rm");
+                if !status.success() {
+                    println!(">>> unpin failed on `{}`", h);
+                }
             }
         }
     }
@@ -98,8 +95,8 @@ fn main() {
             .truncate(true)
             .create(true)
             .open("/data/pacman-ipfs-adder-hashes")
-            .unwrap();
-        writeln!(hashes_file, "{}", ipfs_hash).unwrap();
+            .expect("failed to open ipfs hash file");
+        writeln!(hashes_file, "{}", ipfs_hash).expect("failed to write ipfs hash");
     }
 
     println!(">>> publishing to ipns...");
@@ -112,9 +109,8 @@ fn main() {
                 "--ttl=1h",
                 &ipfs_hash,
             ])
-            .stdout(Stdio::inherit())
             .output()
-            .unwrap();
+            .expect("failed to execute ipfs publish");
         assert_cmd_output("ipfs publish", &ipfs_out);
     }
     println!(">>> done");
