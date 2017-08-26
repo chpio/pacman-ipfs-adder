@@ -81,7 +81,7 @@ fn main() {
             hashes_file
                 .read_to_string(&mut content)
                 .expect("failed reading hash file");
-            for h in content.lines().filter(|h| h != &ipfs_hash) {
+            for h in content.lines().filter(|h| !h.is_empty() && h != &ipfs_hash) {
                 println!(">>> unpinning: `{}`", h);
                 let status = Command::new("ipfs")
                     .args(&["pin", "rm", h])
