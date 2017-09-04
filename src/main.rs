@@ -69,7 +69,7 @@ fn main() {
             .expect("No stdout from ipfs add")
             .to_string()
     };
-    println!(">>> ipfs hash: {:?}", ipfs_hash);
+    println!(">>> ipfs hash: `{}`", ipfs_hash);
 
     let mut unpin_failed_hashes = Vec::new();
     {
