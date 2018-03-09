@@ -3,7 +3,7 @@ authors = ["Thomas Heck <t@b128.net>"]
 name = "pacman-ipfs-adder"
 version = "0.0.0"
 [dependencies]
-rand = "0.3.16"
+rand = "0.4.2"
 [profile.release]
 lto = true
 panic = "abort"
