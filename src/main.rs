@@ -56,7 +56,7 @@ fn main() {
     println!(">>> adding to ipfs...");
     let ipfs_hash = {
         let ipfs_out = Command::new("ipfs")
-            .args(&["add", "--quiet", "--recursive", "/data/arch"])
+            .args(&["add", "--quiet", "--recursive", "--raw-leaves", "/data/arch"])
             .output()
             .expect("failed to execute ipfs add");
         assert_cmd_output("ipfs add", &ipfs_out);
